@@ -172,6 +172,23 @@ for VM in "${VIRTUAL_MACHINES[@]}"; do
                     --parameters "$SERVICE_PORT" "$DATABASE_USER" "$DATABASE_PASSWORD"
             ;;
 
+            database-slave)
+                echo Setting up database slave
+
+                DATABASE_USER=$(jq -r '.user' <<< $SERVICE)
+                DATABASE_PASSWORD=$(jq -r '.password' <<< $SERVICE)
+                MASTER_DATABASE_ADDRESS=$(jq -r '.master_address' <<< $SERVICE)
+                MASTER_DATABASE_PORT=$(jq -r '.master_port' <<< $SERVICE)
+
+                az vm run-command invoke \
+                    --resource-group $RESOURCE_GROUP \
+                    --name $VM_NAME \
+                    --command-id RunShellScript \
+                    --scripts "@./mySql/sql-slave.sh" \
+                    --parameters "$SERVICE_PORT" "$DATABASE_USER" "$DATABASE_PASSWORD" "$MASTER_DATABASE_ADDRESS" "$MASTER_DATABASE_PORT"
+            ;;
+
+
 
         esac
     done
