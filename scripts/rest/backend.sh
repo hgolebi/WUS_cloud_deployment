@@ -9,7 +9,7 @@ DATABASE_PASSWORD=$5
 
 
 
-DIRECTORY="DDD"
+DIRECTORY="$RANDOM"
 
 CONFIG_FOLDER="/src/main/resources/"
 

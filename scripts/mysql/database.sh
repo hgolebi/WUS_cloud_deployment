@@ -8,7 +8,7 @@ MY_SQL_CONFIG="/etc/mysql/mysql.conf.d/mysqld.cnf"
 INIT_DATABASE="https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/initDB.sql"
 POPULATE_DATABASE="https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/populateDB.sql"
 
-cd /~
+cd ~/
 
 # Instalation
 sudo apt-get update
@@ -37,7 +37,7 @@ wget $POPULATE_DATABASE
 # Update configuration
 # sudo echo "port = $DATABASE_PORT" >> $MY_SQL_CONFIG
 # sudo echo "server-id = 1" >> $MY_SQL_CONFIG
-sudo echo "log_bin = /var/log/mysql/mysql-bi.log" >> $MY_SQL_CONFIG
+# sudo echo "log_bin = /var/log/mysql/mysql-bi.log" >> $MY_SQL_CONFIG
 
 sudo sed -i "s/127.0.0.1/0.0.0.0/g" $MY_SQL_CONFIG
 sudo sed -i "s/3306/$DATABASE_PORT/" $MY_SQL_CONFIG

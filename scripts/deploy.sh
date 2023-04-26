@@ -184,8 +184,25 @@ for VM in "${VIRTUAL_MACHINES[@]}"; do
                     --resource-group $RESOURCE_GROUP \
                     --name $VM_NAME \
                     --command-id RunShellScript \
-                    --scripts "@./mySql/sql-slave.sh" \
+                    --scripts "@./scripts/mySql/sql-slave.sh" \
                     --parameters "$SERVICE_PORT" "$DATABASE_USER" "$DATABASE_PASSWORD" "$MASTER_DATABASE_ADDRESS" "$MASTER_DATABASE_PORT"
+            ;;
+
+            nginx-balancer)
+                echo Setting up nginx
+                
+                BACKEND_WRITE_PORT=$(jq -r '.write_port' <<< $SERVICE)
+                BACKEND_WRITE_ADDRESS=$(jq -r '.write_address' <<< $SERVICE)
+                BACKEND_READ_PORT=$(jq -r '.read_port' <<< $SERVICE)
+                BACKEND_READ_ADDRESS=$(jq -r '.read_address' <<< $SERVICE)
+
+                az vm run-command invoke \
+                    --resource-group $RESOURCE_GROUP \
+                    --name $VM_NAME \
+                    --command-id RunShellScript \
+                    --scripts "@./scripts/nginx/balancer.sh" \
+                    --parameters "$SERVICE_PORT" "$BACKEND_WRITE_ADDRESS" "$BACKEND_WRITE_PORT" "$BACKEND_READ_ADDRESS" "$BACKEND_READ_PORT"
+
             ;;
 
 
