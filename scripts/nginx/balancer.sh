@@ -27,6 +27,9 @@ server {
     if (\$request_method = DELETE) {
       proxy_pass http://$BACKEND_WRITE_ADDRESS:$BACKEND_WRITE_PORT;
     }
+    if (\$request_method = OPTIONS) {
+      proxy_pass http://$BACKEND_WRITE_ADDRESS:$BACKEND_WRITE_PORT;
+    }
 
     if (\$request_method = GET ) {
        proxy_pass http://$BACKEND_READ_ADDRESS:$BACKEND_READ_PORT;

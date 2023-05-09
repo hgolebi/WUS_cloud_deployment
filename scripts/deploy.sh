@@ -184,7 +184,7 @@ for VM in "${VIRTUAL_MACHINES[@]}"; do
                     --resource-group $RESOURCE_GROUP \
                     --name $VM_NAME \
                     --command-id RunShellScript \
-                    --scripts "@./scripts/mySql/sql-slave.sh" \
+                    --scripts "@./scripts/mysql/database-slave.sh" \
                     --parameters "$SERVICE_PORT" "$DATABASE_USER" "$DATABASE_PASSWORD" "$MASTER_DATABASE_ADDRESS" "$MASTER_DATABASE_PORT"
             ;;
 
