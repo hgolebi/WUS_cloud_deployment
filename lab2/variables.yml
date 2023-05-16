@@ -1,0 +1,13 @@
+# database credentials
+database_user: "SpringClinicAPI"
+database_password: "{{ lookup('file', 'credentials/SpringClinicAPI/mysqlpassword') }}"
+
+# ports
+frontend_port: 8080
+database_port: 3306
+backend_port: 8080
+
+# host addresses
+backend_host: 4.234.89.82
+database_host: 4.234.94.240
+frontend_host: 4.234.89.229

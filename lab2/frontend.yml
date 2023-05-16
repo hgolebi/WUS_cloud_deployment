@@ -1,0 +1,67 @@
+- name: Deploying frontend
+  hosts: frontend
+  vars_files: variables.yml
+  vars:
+    repository: https://github.com/spring-petclinic/spring-petclinic-angular.git
+    repo_path: /petclinic-front
+  become: true
+  tasks:
+    # - name: Import nvm installation role
+    # # used role from https://github.com/morgangraphics/ansible-role-nvm.git
+    #   ansible.builtin.import_role:
+    #     name: nvm
+    - name: Installing Docker
+      ansible.builtin.shell:
+        cmd: sudo apt-get install docker.io -y
+      register: output
+    - name: Cloning petclinic repository 
+      ansible.builtin.git:
+        repo: "{{ repository }}"
+        dest: "{{ repo_path }}"
+        single_branch: true
+        version: master
+        force: true
+    - name: Change REST API address and port in config
+      ansible.builtin.replace:
+        path: "{{ repo_path }}/src/environments/environment.ts"
+        regexp: '^  REST_API_URL:.+'
+        replace: "  REST_API_URL: 'http://{{ backend_host }}:{{ backend_port }}/petclinic/api/'"
+    - name: Change REST API address and port in production config
+      ansible.builtin.replace:
+        path: "{{ repo_path }}/src/environments/environment.prod.ts"
+        regexp: '^  REST_API_URL:.+'
+        replace: "  REST_API_URL: 'http://{{ backend_host }}:{{ backend_port }}/petclinic/api/'"
+    # - name: Uninstall angular-cli
+    #   ansible.builtin.shell:
+    #     cmd: npm uninstall -g angular-cli @angular/cli
+    # - name: Clean npm cache
+    #   ansible.builtin.shell:
+    #     cmd: npm cache clean
+    # - name: Install latest angular-cli
+    #   ansible.builtin.shell:
+    #     cmd: npm install -g @angular/cli@latest
+    # - name: Install project
+    #   ansible.builtin.shell:
+    #     chdir: "{{ repo_path }}"
+    #     cmd: npm install
+    # - name: Install angular-http-server
+    #   ansible.builtin.shell:
+    #     chdir: "{{ repo_path }}"
+    #     cmd: npm install angular-http-server
+    - name: Change port in dockerfile
+      ansible.builtin.replace:
+        path: "{{ repo_path }}/Dockerfile"
+        regexp: "8080"
+        replace: "{{ frontend_port }}"
+    - name: Build docker image
+      community.docker.docker_image:
+        build:
+          path: "{{ repo_path }}"
+        name: spring-petclinic-angular:latest
+        source: build
+    - name: Run docker image
+      community.docker.docker_container:
+        name: petclinic-angular
+        image: spring-petclinic-angular:latest
+        published_ports:
+          - "{{ frontend_port }}:{{ frontend_port }}"

@@ -1,0 +1,54 @@
+- name: Setting up database
+  hosts: database
+  vars:
+    init_url: "https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/initDB.sql"
+    populate_url: "https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/populateDB.sql"
+  vars_files: variables.yml
+  become: true
+  tasks:
+    - name: Import MySQL installation role
+      # used role from https://github.com/geerlingguy/ansible-role-mysql.git
+      ansible.builtin.import_role:
+        name: ansible-role-mysql
+    - name: Add API user to database
+      community.mysql.mysql_user:
+        name: "{{ database_user }}"
+        password: "{{ lookup('ansible.builtin.password', 'credentials/' + database_user + '/mysqlpassword', length=15) }}"
+        priv: "{{ database_user }}.*:ALL"
+    - name: Create a Spring Pet Clinic directory if it does not exist
+      ansible.builtin.file:
+        path: /spring_pet_clinic/
+        state: directory
+        mode: '0755'
+    - name: Get Spring Pet Clinic database initialization file
+      ansible.builtin.get_url:
+        url: "{{ init_url }}"
+        dest: /spring_pet_clinic/initDB.sql
+        mode: "0540"
+    - name: Get Spring Pet Clinic data initialization file
+      ansible.builtin.get_url:
+        url: "{{ populate_url }}"
+        dest: /spring_pet_clinic/populateDB.sql
+        mode: "0544"
+    - name: Initialize database
+      ansible.builtin.shell:
+        chdir: /spring_pet_clinic/
+        cmd: mysql < initDB.sql
+      register: output
+    - ansible.builtin.debug:
+        msg: "{{ output.rc }}"
+    - name: Populate database
+      ansible.builtin.shell:
+        chdir: /spring_pet_clinic/
+        cmd: mysql petclinic < populateDB.sql
+      register: output
+    - ansible.builtin.debug:
+        msg: "{{ output.rc }}"
+    - name: Test database initialization
+      community.mysql.mysql_query:
+        login_db: petclinic
+        query: SHOW TABLES
+      register: query_result
+    - name: Show result of Test
+      ansible.builtin.debug:
+        msg: "{{ query_result }}"
