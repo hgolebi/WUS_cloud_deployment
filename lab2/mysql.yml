@@ -9,7 +9,7 @@
     - name: Import MySQL installation role
       # used role from https://github.com/geerlingguy/ansible-role-mysql.git
       ansible.builtin.import_role:
-        name: ansible-role-mysql
+        name: mysql
     - name: Add API user to database
       community.mysql.mysql_user:
         name: "{{ database_user }}"
