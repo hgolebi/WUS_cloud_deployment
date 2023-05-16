@@ -14,7 +14,8 @@
       community.mysql.mysql_user:
         name: "{{ database_user }}"
         password: "{{ lookup('ansible.builtin.password', 'credentials/' + database_user + '/mysqlpassword', length=15) }}"
-        priv: "{{ database_user }}.*:ALL"
+        host: "{{ backend_priv_ip }}"
+        priv: "*.*:ALL"
     - name: Create a Spring Pet Clinic directory if it does not exist
       ansible.builtin.file:
         path: /spring_pet_clinic/

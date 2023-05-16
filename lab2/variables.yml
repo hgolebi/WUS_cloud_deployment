@@ -8,6 +8,11 @@ database_port: 3306
 backend_port: 8080
 
 # host addresses
-backend_host: 4.234.89.82
-database_host: 4.234.94.240
 frontend_host: 4.234.89.229
+database_host: 4.234.94.240
+backend_host: 4.234.89.82
+
+# private net addresses
+frontend_priv_ip: 10.0.1.5
+backend_priv_ip: 10.0.2.5
+database_priv_ip: 10.0.3.5
