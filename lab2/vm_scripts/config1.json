@@ -1,5 +1,5 @@
 {
-    "resource_group": "wus_lab2",
+    "resource_group": "wuslab2",
     "network_address_prefix": "10.0.0.0/16",
     "network_security_group": [
         {
@@ -85,10 +85,10 @@
     ],
     "public_ip": [
         {
-            "name": "front"
+            "name": "frontend"
         },
         {
-            "name": "back"
+            "name": "backend"
         },
         {
             "name": "database"
@@ -113,7 +113,7 @@
             "name": "backendVM",
             "subnet": "backendSubnet",
             "private_ip_address": "10.0.2.5",
-            "public_ip_address": "back",
+            "public_ip_address": "backend",
             "deploy": [
                 {
                     "type": "backend",
@@ -129,12 +129,12 @@
             "name": "frontendVM",
             "subnet": "frontendSubnet",
             "private_ip_address": "10.0.1.5",
-            "public_ip_address": "front",
+            "public_ip_address": "frontend",
             "deploy": [
                 {
                     "type": "frontend",
                     "port": 8080,
-                    "backend_address": "back",
+                    "backend_address": "backend",
                     "backend_port": 8080
                 }
             ]
