@@ -6,10 +6,10 @@
     repo_path: /petclinic-front
   become: true
   tasks:
-    # - name: Import nvm installation role
-    # # used role from https://github.com/morgangraphics/ansible-role-nvm.git
-    #   ansible.builtin.import_role:
-    #     name: nvm
+    - name: Updating apt-get
+      ansible.builtin.shell:
+        cmd: sudo apt-get update
+      register: output
     - name: Installing Docker
       ansible.builtin.shell:
         cmd: sudo apt-get install docker.io -y
@@ -31,23 +31,6 @@
         path: "{{ repo_path }}/src/environments/environment.prod.ts"
         regexp: '^  REST_API_URL:.+'
         replace: "  REST_API_URL: 'http://{{ backend_host }}:{{ backend_port }}/petclinic/api/'"
-    # - name: Uninstall angular-cli
-    #   ansible.builtin.shell:
-    #     cmd: npm uninstall -g angular-cli @angular/cli
-    # - name: Clean npm cache
-    #   ansible.builtin.shell:
-    #     cmd: npm cache clean
-    # - name: Install latest angular-cli
-    #   ansible.builtin.shell:
-    #     cmd: npm install -g @angular/cli@latest
-    # - name: Install project
-    #   ansible.builtin.shell:
-    #     chdir: "{{ repo_path }}"
-    #     cmd: npm install
-    # - name: Install angular-http-server
-    #   ansible.builtin.shell:
-    #     chdir: "{{ repo_path }}"
-    #     cmd: npm install angular-http-server
     - name: Change port in dockerfile
       ansible.builtin.replace:
         path: "{{ repo_path }}/Dockerfile"

@@ -26,6 +26,11 @@
         url: "{{ init_url }}"
         dest: /spring_pet_clinic/initDB.sql
         mode: "0540"
+    - name: Remove user adding line in database initialization file
+      ansible.builtin.lineinfile:
+        path: "/spring_pet_clinic/initDB.sql"
+        regexp: "^GRANT.+"
+        state: absent
     - name: Get Spring Pet Clinic data initialization file
       ansible.builtin.get_url:
         url: "{{ populate_url }}"

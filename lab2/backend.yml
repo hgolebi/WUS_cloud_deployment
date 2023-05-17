@@ -6,10 +6,6 @@
     repo_path: /petclinic
   become: true
   tasks:
-    # - name: Installing java
-    # # used role from https://github.com/opsta/ansible-java.git
-    #   ansible.builtin.import_role:
-    #     name: java-installation
     - name: Updating apt-get
       ansible.builtin.shell:
         cmd: sudo apt-get update
