@@ -1,24 +1,24 @@
 - name: Pet clinic deployment
   hosts: localhost
-  vars_files: variables.yml
+  vars_files: config.yml
   vars:
     dir: "{{ playbook_dir }}"
   tasks:
-    # - name: Create virtual machines
-    #   ansible.builtin.shell:
-    #     chdir: "{{ dir }}/vm_scripts"
-    #     cmd: bash deploy.sh config1.json
-    #   register: output
-    # - ansible.builtin.debug:
-    #     msg: "{{ output }}"
+    - name: Create virtual machines
+      ansible.builtin.shell:
+        chdir: "{{ dir }}/vm_scripts"
+        cmd: bash deploy.sh config1.json
+      register: output
+    - ansible.builtin.debug:
+        msg: "{{ output }}"
     - name: Get virtual machines public ip's
       ansible.builtin.shell:
         cmd: az network public-ip show --resource-group "{{ resource_group }}"  --name "{{ item }}"  --query "ipAddress" --output tsv
       loop: "{{ groups['wuslab2'] }}"
       register: echo
-    - name: Save virtual machines public ip's in variables.yml
+    - name: Save virtual machines public ip's in config.yml
       ansible.builtin.replace:
-        path: "{{ playbook_dir }}/variables.yml"
+        path: "{{ playbook_dir }}/config.yml"
         regexp: "^{{ item.item }}_host.+"
         replace: "{{ item.item }}_host: {{ item.stdout }}"
       loop: "{{ echo.results }}"
@@ -30,31 +30,21 @@
       loop: "{{ echo.results }}"
 - name: Deploying frontend
   hosts: frontend
-  vars_files: variables.yml
-  vars:
-    repository: https://github.com/spring-petclinic/spring-petclinic-angular.git
-    repo_path: /petclinic-front
+  vars_files: config.yml
   become: true
-  tasks:
-    - ansible.builtin.include_tasks:
-        file: "{{ playbook_dir }}/frontend.yml"
+  roles:
+    - frontend
+
 - name: Deploying backend
   hosts: backend
-  vars_files: variables.yml
-  vars:
-    repository: https://github.com/spring-petclinic/spring-petclinic-rest.git
-    repo_path: /petclinic
+  vars_files: config.yml
   become: true
-  tasks:
-    - ansible.builtin.include_tasks:
-        file: "{{ playbook_dir }}/backend.yml"
+  roles:
+    - backend
+
 - name: Setting up database
   hosts: database
-  vars:
-    init_url: "https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/initDB.sql"
-    populate_url: "https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/populateDB.sql"
-  vars_files: variables.yml
+  vars_files: config.yml
   become: true
-  tasks:
-    - ansible.builtin.include_tasks:
-        file: "{{ playbook_dir }}/mysql.yml"
+  roles:
+    - database

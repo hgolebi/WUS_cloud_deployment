@@ -2,9 +2,9 @@ wuslab2:
 
   hosts:
     frontend:
-      ansible_host: 20.58.3.127
+      ansible_host: 51.11.143.10
     backend:
-      ansible_host: 20.68.140.31
+      ansible_host: 20.49.202.212
     database:
-      ansible_host: 20.68.139.81
+      ansible_host: 20.49.204.9
       
