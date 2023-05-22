@@ -4,13 +4,13 @@
   vars:
     dir: "{{ playbook_dir }}"
   tasks:
-    - name: Create virtual machines
-      ansible.builtin.shell:
-        chdir: "{{ dir }}/vm_scripts"
-        cmd: bash deploy.sh config1.json
-      register: output
-    - ansible.builtin.debug:
-        msg: "{{ output }}"
+    # - name: Create virtual machines
+    #   ansible.builtin.shell:
+    #     chdir: "{{ dir }}/vm_scripts"
+    #     cmd: bash deploy.sh config1.json
+    #   register: output
+    # - ansible.builtin.debug:
+    #     msg: "{{ output }}"
     - name: Get virtual machines public ip's
       ansible.builtin.shell:
         cmd: az network public-ip show --resource-group "{{ resource_group }}"  --name "{{ item }}"  --query "ipAddress" --output tsv

@@ -1,4 +1,3 @@
-
 - name: Updating apt-get
   ansible.builtin.shell:
     cmd: sudo apt-get update
