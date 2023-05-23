@@ -119,4 +119,11 @@ for VM in "${VIRTUAL_MACHINES[@]}"; do
         --image Ubuntu2204 \
         --generate-ssh-keys
 
+
+    # ip=$(cat address.txt)
+
+    # sed -i "s/host_ip: .*/host_ip: $address/" config.yml
+
+    # echo "Adres IP został zaktualizowany w pliku config.yml."
+
 done

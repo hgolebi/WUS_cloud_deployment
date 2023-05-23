@@ -41,7 +41,7 @@
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/main/resources/application-mysql.properties"
     regexp: 'localhost:3306'
-    replace: '{{ database_priv_ip }}:{{ database_port }}'
+    replace: '{{ vars[database_host].priv_ip }}:{{ database_port }}'
 - name: Change database user in config file
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/main/resources/application-mysql.properties"
@@ -65,16 +65,17 @@
   community.docker.docker_image:
     build:
       path: "{{ repo_path }}"
-    name: petclinic:latest
+    name: spring-petclinic-backend:latest
     source: build
     force_tag: true
+    force_source: true
 - name: Remove docker container
   community.docker.docker_container:
-    name: petclinicAPI
+    name: petclinic-backend
     state: absent
 - name: Run docker container
   community.docker.docker_container:
-    name: petclinicAPI
-    image: petclinic
+    name: petclinic-backend
+    image: spring-petclinic-backend
     published_ports:
       - "{{ backend_port }}:{{ backend_port }}"

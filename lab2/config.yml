@@ -1,25 +1,26 @@
-# database credentials
-database_user: "SpringClinicAPI"
-database_password: "{{ lookup('file', 'credentials/SpringClinicAPI/mysqlpassword') }}"
-
 resource_group: wuslab2
 
-vms: 
-  - frontend
-  - backend
-  - database
+# You can setup where each service will be deployed
+frontend_host: vm3
+backend_host: vm2
+database_host: vm3
 
 # ports
 frontend_port: 8080
-backend_port: 8080
+backend_port: 8081
 database_port: 3306
 
-# host addresses
-frontend_host: 20.108.187.240
-backend_host: 51.145.95.210
-database_host: 20.117.98.178
+# virtual machines addresses
+vm1:
+  address: 51.132.216.242
+  priv_ip: 10.0.1.5
+vm2:
+  address: 40.120.62.9
+  priv_ip: 10.0.2.5
+vm3:
+  address: 4.234.216.234
+  priv_ip: 10.0.3.5
 
-# private net addresses
-frontend_priv_ip: 10.0.1.5
-backend_priv_ip: 10.0.2.5
-database_priv_ip: 10.0.3.5
+# database credentials
+database_user: "api"
+database_password: "{{ lookup('file', 'credentials/SpringClinicAPI/mysqlpassword') }}"

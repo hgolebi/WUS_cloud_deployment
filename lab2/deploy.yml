@@ -19,8 +19,8 @@
     - name: Save virtual machines public ip's in config.yml
       ansible.builtin.replace:
         path: "{{ playbook_dir }}/config.yml"
-        regexp: "^{{ item.item }}_host.+"
-        replace: "{{ item.item }}_host: {{ item.stdout }}"
+        regexp: "^{{ item.item }}:.*\n *address:.*"
+        replace: "{{ item.item }}:\n  address: {{ item.stdout }}"
       loop: "{{ echo.results }}"
     - name: Save virtual machines public ip's in inventory.yaml
       ansible.builtin.replace:
@@ -28,23 +28,26 @@
         regexp: "^ *{{ item.item }}:\n *ansible_host.+"
         replace: "    {{ item.item }}:\n      ansible_host: {{ item.stdout }}"
       loop: "{{ echo.results }}"
-- name: Deploying frontend
-  hosts: frontend
+
+- name: Setting up database
+  hosts: "{{ database_host }}"
   vars_files: config.yml
   become: true
   roles:
-    - frontend
+    - database
 
 - name: Deploying backend
-  hosts: backend
+  hosts: "{{ backend_host }}"
   vars_files: config.yml
   become: true
   roles:
     - backend
 
-- name: Setting up database
-  hosts: database
+- name: Deploying frontend
+  hosts: "{{ frontend_host }}"
   vars_files: config.yml
   become: true
   roles:
-    - database
+    - frontend
+
+

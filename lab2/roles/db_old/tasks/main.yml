@@ -1,0 +1,52 @@
+- name: Import MySQL installation role
+  # used role from https://github.com/geerlingguy/ansible-role-mysql.git
+  ansible.builtin.import_role:
+    name: mysql_installation
+- name: Add API user to database
+  community.mysql.mysql_user:
+    name: "{{ database_user }}"
+    password: "{{ lookup('ansible.builtin.password', 'credentials/' + database_user + '/mysqlpassword', length=15) }}"
+    host: "{{ backend_priv_ip }}"
+    priv: "*.*:ALL"
+- name: Create a Spring Pet Clinic directory if it does not exist
+  ansible.builtin.file:
+    path: /spring_pet_clinic/
+    state: directory
+    mode: '0755'
+- name: Get Spring Pet Clinic database initialization file
+  ansible.builtin.get_url:
+    url: "{{ init_url }}"
+    dest: /spring_pet_clinic/initDB.sql
+    mode: "0540"
+- name: Remove user adding line in database initialization file
+  ansible.builtin.lineinfile:
+    path: "/spring_pet_clinic/initDB.sql"
+    regexp: "^GRANT.+"
+    state: absent
+- name: Get Spring Pet Clinic data initialization file
+  ansible.builtin.get_url:
+    url: "{{ populate_url }}"
+    dest: /spring_pet_clinic/populateDB.sql
+    mode: "0544"
+- name: Initialize database
+  ansible.builtin.shell:
+    chdir: /spring_pet_clinic/
+    cmd: mysql < initDB.sql
+  register: output
+- ansible.builtin.debug:
+    msg: "{{ output.rc }}"
+- name: Populate database
+  ansible.builtin.shell:
+    chdir: /spring_pet_clinic/
+    cmd: mysql petclinic < populateDB.sql
+  register: output
+- ansible.builtin.debug:
+    msg: "{{ output.rc }}"
+- name: Test database initialization
+  community.mysql.mysql_query:
+    login_db: petclinic
+    query: SHOW TABLES
+  register: query_result
+- name: Show result of Test
+  ansible.builtin.debug:
+    msg: "{{ query_result }}"

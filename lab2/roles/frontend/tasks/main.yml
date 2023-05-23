@@ -17,12 +17,12 @@
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/environments/environment.ts"
     regexp: '^  REST_API_URL:.+'
-    replace: "  REST_API_URL: 'http://{{ backend_host }}:{{ backend_port }}/petclinic/api/'"
+    replace: "  REST_API_URL: 'http://{{ vars[backend_host].address }}:{{ backend_port }}/petclinic/api/'"
 - name: Change REST API address and port in production config
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/environments/environment.prod.ts"
     regexp: '^  REST_API_URL:.+'
-    replace: "  REST_API_URL: 'http://{{ backend_host }}:{{ backend_port }}/petclinic/api/'"
+    replace: "  REST_API_URL: 'http://{{ vars[backend_host].address }}:{{ backend_port }}/petclinic/api/'"
 - name: Change port in dockerfile
   ansible.builtin.replace:
     path: "{{ repo_path }}/Dockerfile"
@@ -34,7 +34,13 @@
       path: "{{ repo_path }}"
     name: spring-petclinic-angular:latest
     source: build
-- name: Run docker image
+    force_tag: true
+    force_source: true
+- name: Remove docker container
+  community.docker.docker_container:
+    name: petclinic-angular
+    state: absent
+- name: Run docker container
   community.docker.docker_container:
     name: petclinic-angular
     image: spring-petclinic-angular:latest
