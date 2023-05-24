@@ -50,7 +50,7 @@
       when: setup == 3 or setup == 4
 
 - name: Setting up slave database
-  hosts: "{{ db_default_host }}"
+  hosts: "{{ db_slave_host }}"
   vars_files: config.yml
   vars:
     type: slave
@@ -66,9 +66,9 @@
   roles:
     - backend
 
-# - name: Deploying frontend
-#   hosts: "{{ frontend_host }}"
-#   vars_files: config.yml
-#   become: true
-#   roles:
-#     - frontend
+- name: Deploying frontend
+  hosts: "{{ frontend_host }}"
+  vars_files: config.yml
+  become: true
+  roles:
+    - frontend
