@@ -1,2 +1,2 @@
 repository: https://github.com/spring-petclinic/spring-petclinic-rest.git
-repo_path: /petclinic-back
+repo_path: "/backend_{{ type }}"

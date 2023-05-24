@@ -29,46 +29,77 @@
         replace: "    {{ item.item }}:\n      ansible_host: {{ item.stdout }}"
       loop: "{{ echo.results }}"
 
-- name: Setting up default database
-  hosts: "{{ db_default_host }}"
-  vars_files: config.yml
-  vars:
-    type: default
-  become: true
-  roles:
-    - role: database
-      when: setup == 1
+# - name: Setting up default database
+#   hosts: "{{ db_default_host }}"
+#   vars_files: config.yml
+#   vars:
+#     type: default
+#   become: true
+#   roles:
+#     - role: database
+#       when: setup == 1
 
-- name: Setting up master database
-  hosts: "{{ db_master_host }}"
-  vars_files: config.yml
-  vars:
-    type: master
-  become: true
-  roles:
-    - role: database
-      when: setup == 3 or setup == 4
+# - name: Setting up master database
+#   hosts: "{{ db_master_host }}"
+#   vars_files: config.yml
+#   vars:
+#     type: master
+#   become: true
+#   roles:
+#     - role: database
+#       when: setup == 3 or setup == 4
 
-- name: Setting up slave database
-  hosts: "{{ db_slave_host }}"
-  vars_files: config.yml
-  vars:
-    type: slave
-  become: true
-  roles:
-    - role: database
-      when: setup == 3 or setup == 4
+# - name: Setting up slave database
+#   hosts: "{{ db_slave_host }}"
+#   vars_files: config.yml
+#   vars:
+#     type: slave
+#   become: true
+#   roles:
+#     - role: database
+#       when: setup == 3 or setup == 4
 
-- name: Deploying backend
-  hosts: "{{ backend_host }}"
-  vars_files: config.yml
-  become: true
-  roles:
-    - backend
+# - name: Deploying default backend
+#   hosts: "{{ back_default_host }}"
+#   vars_files: config.yml
+#   vars:
+#     type: default
+#   become: true
+#   roles:
+#     - role: backend
+#       when: setup == 1 or setup == 3
 
-- name: Deploying frontend
-  hosts: "{{ frontend_host }}"
+# - name: Deploying master backend
+#   hosts: "{{ back_master_host }}"
+#   vars_files: config.yml
+#   vars:
+#     type: master
+#   become: true
+#   roles:
+#     - role: backend
+#       when: setup == 4
+
+# - name: Deploying slave backend
+#   hosts: "{{ back_slave_host }}"
+#   vars_files: config.yml
+#   vars:
+#     type: slave
+#   become: true
+#   roles:
+#     - role: backend
+#       when: setup == 4
+
+- name: Deploying ngnix
+  hosts: "{{ ngnix_host }}"
   vars_files: config.yml
   become: true
   roles:
-    - frontend
+    - role: ngnix
+      when: setup == 4
+
+# - name: Deploying frontend
+#   hosts: "{{ frontend_host }}"
+#   vars_files: config.yml
+#   become: true
+#   roles:
+#     - frontend

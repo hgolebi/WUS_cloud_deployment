@@ -2,10 +2,16 @@
   ansible.builtin.shell:
     cmd: sudo apt-get update
   register: output
+- ansible.builtin.debug:
+    msg: "{{ output }}"
+
 - name: Installing Docker
   ansible.builtin.shell:
     cmd: sudo apt-get install docker.io -y
   register: output
+- ansible.builtin.debug:
+    msg: "{{ output }}"
+
 - name: Cloning petclinic repository 
   ansible.builtin.git:
     repo: "{{ repository }}"
@@ -13,21 +19,41 @@
     single_branch: true
     version: master
     force: true
+
 - name: Change REST API address and port in config
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/environments/environment.ts"
     regexp: '^  REST_API_URL:.+'
     replace: "  REST_API_URL: 'http://{{ vars[backend_host].address }}:{{ backend_port }}/petclinic/api/'"
+  when: setup == 1 or setup == 3
+
 - name: Change REST API address and port in production config
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/environments/environment.prod.ts"
     regexp: '^  REST_API_URL:.+'
     replace: "  REST_API_URL: 'http://{{ vars[backend_host].address }}:{{ backend_port }}/petclinic/api/'"
+  when: setup == 1 or setup == 3
+
+- name: Set NGNIX address and port in config
+  ansible.builtin.replace:
+    path: "{{ repo_path }}/src/environments/environment.ts"
+    regexp: '^  REST_API_URL:.+'
+    replace: "  REST_API_URL: 'http://{{ vars[ngnix_host].address }}:{{ ngnix_port }}/petclinic/api/'"
+  when: setup == 4
+
+- name: Set NGNIX address and port in production config
+  ansible.builtin.replace:
+    path: "{{ repo_path }}/src/environments/environment.prod.ts"
+    regexp: '^  REST_API_URL:.+'
+    replace: "  REST_API_URL: 'http://{{ vars[ngnix_host].address }}:{{ ngnix_port }}/petclinic/api/'"
+  when: setup == 4
+
 - name: Change port in dockerfile
   ansible.builtin.replace:
     path: "{{ repo_path }}/Dockerfile"
     regexp: "8080"
     replace: "{{ frontend_port }}"
+
 - name: Build docker image
   community.docker.docker_image:
     build:
@@ -36,10 +62,12 @@
     source: build
     force_tag: true
     force_source: true
+
 - name: Remove docker container
   community.docker.docker_container:
     name: petclinic-angular
     state: absent
+
 - name: Run docker container
   community.docker.docker_container:
     name: petclinic-angular

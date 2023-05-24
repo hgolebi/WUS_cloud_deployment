@@ -1,0 +1,80 @@
+- name: Updating apt-get
+  ansible.builtin.shell:
+    cmd: sudo apt-get update
+  register: output
+- ansible.builtin.debug:
+    msg: "{{ output.stdout_lines }}"
+
+- name: Installing Docker
+  ansible.builtin.shell:
+    cmd: sudo apt-get install docker.io -y
+  register: output
+- ansible.builtin.debug:
+    msg: "{{ output }}"
+
+- name: Create database directory
+  ansible.builtin.file:
+    path: "/ngnix"
+    state: directory
+    mode: '0755'
+
+- name: Copy Dockerfile
+  ansible.builtin.copy:
+    src: "Dockerfile"
+    dest: "/ngnix/Dockerfile"
+
+- name: Copy config file
+  ansible.builtin.copy:
+    src: "petclinic.conf"
+    dest: "/ngnix/petclinic.conf"
+
+- name: Replace ngnix port in config file
+  ansible.builtin.replace:
+    path: "/ngnix/petclinic.conf"
+    regexp: \$BALANCER_PORT
+    replace: "{{ ngnix_port }}"
+
+- name: Replace write backend address in config file
+  ansible.builtin.replace:
+    path: "/ngnix/petclinic.conf"
+    regexp: \$BACKEND_WRITE_ADDRESS
+    replace: "{{ vars[back_master_host].address }}"
+
+- name: Replace write backend port in config file
+  ansible.builtin.replace:
+    path: "/ngnix/petclinic.conf"
+    regexp: \$BACKEND_WRITE_PORT
+    replace: "{{ back_master_port }}"
+
+- name: Replace read backend address in config file
+  ansible.builtin.replace:
+    path: "/ngnix/petclinic.conf"
+    regexp: \$BACKEND_READ_ADDRESS
+    replace: "{{ vars[back_slave_host].address }}"
+
+- name: Replace read backend port in config file
+  ansible.builtin.replace:
+    path: "/ngnix/petclinic.conf"
+    regexp: \$BACKEND_READ_PORT
+    replace: "{{ back_slave_port }}"
+
+- name: Build docker image
+  community.docker.docker_image:
+    build:
+      path: /ngnix
+    name: "petclinic-ngnix:latest"
+    source: build
+    force_tag: true
+    force_source: true
+
+- name: Remove docker container
+  community.docker.docker_container:
+    name: "petclinic-ngnix"
+    state: absent
+
+- name: Run docker container
+  community.docker.docker_container:
+    name: "petclinic-ngnix"
+    image: "petclinic-ngnix:latest"
+    published_ports:
+      - "{{ ngnix_port}}:{{ ngnix_port }}"

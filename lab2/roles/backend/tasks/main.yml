@@ -42,14 +42,14 @@
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/main/resources/application.properties"
     regexp: '^server.port=.+'
-    replace: 'server.port={{ backend_port }}'
+    replace: 'server.port={{ vars["back_" + type + "_port"] }}'
 
 - name: Change database address and port in config file
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/main/resources/application-mysql.properties"
     regexp: '^spring\.datasource\.url = jdbc:mysql:\/\/.*\/petclinic\?'
-    replace: 'spring.datasource.url = jdbc:mysql://{{ vars[database_host].priv_ip }}:{{ database_port }}/petclinic?'
-  when: setup == 1
+    replace: 'spring.datasource.url = jdbc:mysql://{{ vars[vars["db_" + type + "_host"]].priv_ip }}:{{ vars["db_" + type + "_port"] }}/petclinic?'
+  when: setup == 1 or setup == 4
 
 - name: Change database address and port in config file
   ansible.builtin.replace:
@@ -84,19 +84,19 @@
   community.docker.docker_image:
     build:
       path: "{{ repo_path }}"
-    name: spring-petclinic-backend:latest
+    name: "backend-{{ type }}:latest"
     source: build
     force_tag: true
     force_source: true
 
 - name: Remove docker container
   community.docker.docker_container:
-    name: petclinic-backend
+    name: "backend-{{ type }}"
     state: absent
 
 - name: Run docker container
   community.docker.docker_container:
-    name: petclinic-backend
-    image: spring-petclinic-backend
+    name: "backend-{{ type }}"
+    image: "backend-{{ type }}:latest"
     published_ports:
-      - "{{ backend_port }}:{{ backend_port }}"
+      - '{{ vars["back_" + type + "_port"] }}:{{ vars["back_" + type + "_port"] }}'
