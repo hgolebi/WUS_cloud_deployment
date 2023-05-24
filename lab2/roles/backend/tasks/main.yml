@@ -4,22 +4,26 @@
   register: output
 - ansible.builtin.debug:
     msg: "{{ output.stdout_lines }}"
+
 - name: Installing Docker
   ansible.builtin.shell:
     cmd: sudo apt-get install docker.io -y
   register: output
 - ansible.builtin.debug:
     msg: "{{ output.stdout_lines }}"
+
 - name: Installing java
   ansible.builtin.shell:
     cmd: sudo apt-get install openjdk-17-jdk -y
   ignore_errors: true
+
 - name: Making sure java is installed
   ansible.builtin.shell:
     cmd: sudo apt-get install openjdk-17-jdk -y
   register: output
 - ansible.builtin.debug:
     msg: "{{ output.rc }}"
+
 - name: Clone repository
   ansible.builtin.git:
     repo: "{{ repository }}"
@@ -27,31 +31,45 @@
     single_branch: true
     version: master
     force: true
+
 - name: Change database type in config file to MySQL
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/main/resources/application.properties"
     regexp: '=hsqldb'
     replace: '=mysql'
+
 - name: Change API port in config file
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/main/resources/application.properties"
     regexp: '^server.port=.+'
     replace: 'server.port={{ backend_port }}'
+
 - name: Change database address and port in config file
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/main/resources/application-mysql.properties"
-    regexp: 'localhost:3306'
-    replace: '{{ vars[database_host].priv_ip }}:{{ database_port }}'
+    regexp: '^spring\.datasource\.url = jdbc:mysql:\/\/.*\/petclinic\?'
+    replace: 'spring.datasource.url = jdbc:mysql://{{ vars[database_host].priv_ip }}:{{ database_port }}/petclinic?'
+  when: setup == 1
+
+- name: Change database address and port in config file
+  ansible.builtin.replace:
+    path: "{{ repo_path }}/src/main/resources/application-mysql.properties"
+    regexp: '^spring\.datasource\.url = jdbc:mysql:\/\/.*\/petclinic\?useUnicode=true'
+    replace: 'spring.datasource.url = jdbc:mysql:replication://{{ vars[db_master_host].priv_ip }}:{{ db_master_port }},{{ vars[db_slave_host].priv_ip }}:{{ db_slave_port }}/petclinic?useUnicode=true&allowSourceDownConnections=true'
+  when: setup == 3
+
 - name: Change database user in config file
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/main/resources/application-mysql.properties"
     regexp: '^spring.datasource.username=.+'
     replace: 'spring.datasource.username={{ database_user }}'
+
 - name: Change database user password in config file
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/main/resources/application-mysql.properties"
     regexp: '^spring.datasource.password=.+'
     replace: 'spring.datasource.password={{ database_password }}'
+
 - name: Create a dockerfile
   ansible.builtin.copy:
     dest: "{{ repo_path }}/dockerfile"
@@ -61,6 +79,7 @@
       WORKDIR /petclinic
       CMD ["./mvnw", "spring-boot:run"]
     mode: "0744"
+
 - name: Build docker image
   community.docker.docker_image:
     build:
@@ -69,10 +88,12 @@
     source: build
     force_tag: true
     force_source: true
+
 - name: Remove docker container
   community.docker.docker_container:
     name: petclinic-backend
     state: absent
+
 - name: Run docker container
   community.docker.docker_container:
     name: petclinic-backend

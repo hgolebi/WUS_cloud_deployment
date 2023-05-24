@@ -1,0 +1,8 @@
+FROM mysql:8.0.31 as build-env
+
+COPY config-file.cnf /etc/mysql/conf.d/config-file.cnf
+
+RUN echo "CHANGE MASTER TO MASTER_HOST='host', MASTER_USER='replication', MASTER_PORT=3300; start slave;" > /docker-entrypoint-initdb.d/1.sql
+
+ENV MYSQL_ROOT_PASSWORD='root' \
+    MYSQL_ROOT_HOST='%' \

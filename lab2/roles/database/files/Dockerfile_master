@@ -1,0 +1,18 @@
+FROM mysql:8.0.31 as build-env
+
+COPY config-file.cnf /etc/mysql/conf.d/config-file.cnf
+
+RUN curl \
+    https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/initDB.sql \
+    | sed '/^GRANT/d' >/docker-entrypoint-initdb.d/1.sql
+RUN curl \
+    https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/populateDB.sql \
+    --output /docker-entrypoint-initdb.d/2.sql
+RUN echo "CREATE USER 'replication'@'%'; GRANT REPLICATION SLAVE ON *.* TO 'replication'@'%';" > /docker-entrypoint-initdb.d/3.sql
+
+ENV MYSQL_ROOT_PASSWORD='root' \
+    MYSQL_ROOT_HOST='%' \
+    MYSQL_USER="pc" \
+    MYSQL_PASSWORD="petclinic" \
+    MYSQL_DATABASE="petclinic" 
+
