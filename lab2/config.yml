@@ -2,12 +2,12 @@ setup: 4
 
 # You can setup where each service will be deployed
 frontend_host: vm1
-back_default_host: vm2
-back_master_host: vm2
-back_slave_host: vm3
+back_default_host: vm1
+back_master_host: vm1
+back_slave_host: vm1
 db_default_host: vm1
-db_master_host: vm3
-db_slave_host: vm2
+db_master_host: vm1
+db_slave_host: vm1
 ngnix_host: vm1
 
 # ports
@@ -24,13 +24,13 @@ resource_group: wuslab2
 
 # virtual machines addresses
 vm1:
-  address: 51.132.22.85
+  address: 51.145.80.110
   priv_ip: 10.0.1.5
 vm2:
-  address: 51.132.20.233
+  address: 20.0.240.196
   priv_ip: 10.0.2.5
 vm3:
-  address: 51.132.18.91
+  address: 51.145.82.255
   priv_ip: 10.0.3.5
 
 # database credentials

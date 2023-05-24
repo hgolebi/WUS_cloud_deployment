@@ -4,44 +4,52 @@
   register: output
 - ansible.builtin.debug:
     msg: "{{ output.stdout_lines }}"
+
 - name: Installing Docker
   ansible.builtin.shell:
     cmd: sudo apt-get install docker.io -y
   register: output
 - ansible.builtin.debug:
     msg: "{{ output }}"
+
 - name: Create database directory
   ansible.builtin.file:
     path: "/database_{{ type }}"
     state: directory
     mode: '0755'
+
 - name: Copy Dockerfile
   ansible.builtin.copy:
     src: "Dockerfile_{{ type }}"
     dest: "/database_{{ type }}/Dockerfile"
+
 - name: Copy config file
   ansible.builtin.copy:
     src: "{{ type }}.cnf"
     dest: "/database_{{ type }}/config-file.cnf"
   when: type != 'default'
+
 - name: Change database username in Dockerfile
   ansible.builtin.replace:
     path: /database_{{ type }}/Dockerfile
     regexp: '^.*MYSQL_USER=".*"'
     replace: '    MYSQL_USER="{{ database_user }}"'
   when: type != 'slave'
+
 - name: Change database password in Dockerfile
   ansible.builtin.replace:
     path: /database_{{ type }}/Dockerfile
     regexp: '^.*MYSQL_PASSWORD=".*"'
     replace: '    MYSQL_PASSWORD="{{ database_password }}"'
   when: type != 'slave'
+
 - name: Change master host and port in slave Dockerfile
   ansible.builtin.replace:
     path: /database_{{ type }}/Dockerfile
     regexp: "MASTER_HOST='.*', MASTER_USER='replication', MASTER_PORT=.*; start slave;"
     replace: "MASTER_HOST='{{ vars[db_master_host].priv_ip }}', MASTER_USER='replication', MASTER_PORT={{ db_master_port }}; start slave;"
   when: type == 'slave'
+
 - name: Build docker image
   community.docker.docker_image:
     build:
@@ -50,14 +58,15 @@
     source: build
     force_tag: true
     force_source: true
+
 - name: Remove docker container
   community.docker.docker_container:
     name: "database_{{ type }}"
     state: absent
+
 - name: Run docker container
   community.docker.docker_container:
     name: "database_{{ type }}"
     image: "petclinic-database-{{ type }}:latest"
     published_ports:
       - "{{ vars['db_' + type + '_port'] }}:3306"
-

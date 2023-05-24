@@ -24,14 +24,14 @@
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/environments/environment.ts"
     regexp: '^  REST_API_URL:.+'
-    replace: "  REST_API_URL: 'http://{{ vars[backend_host].address }}:{{ backend_port }}/petclinic/api/'"
+    replace: "  REST_API_URL: 'http://{{ vars[back_default_host].address }}:{{ back_default_port }}/petclinic/api/'"
   when: setup == 1 or setup == 3
 
 - name: Change REST API address and port in production config
   ansible.builtin.replace:
     path: "{{ repo_path }}/src/environments/environment.prod.ts"
     regexp: '^  REST_API_URL:.+'
-    replace: "  REST_API_URL: 'http://{{ vars[backend_host].address }}:{{ backend_port }}/petclinic/api/'"
+    replace: "  REST_API_URL: 'http://{{ vars[back_default_host].address }}:{{ back_default_port }}/petclinic/api/'"
   when: setup == 1 or setup == 3
 
 - name: Set NGNIX address and port in config
