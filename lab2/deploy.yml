@@ -3,17 +3,16 @@
   vars_files: config.yml
   vars:
     dir: "{{ playbook_dir }}"
-    create: 'n'
   tasks:
     - name: Create virtual machines
       ansible.builtin.shell:
         chdir: "{{ dir }}/vm_scripts"
         cmd: bash deploy.sh config1.json
       register: output
-      when: create == "y"
+      when: create_vms
     - ansible.builtin.debug:
         msg: "{{ output }}"
-      when: create == 'y'
+      when: create_vms
     - name: Get virtual machines public ip's
       ansible.builtin.shell:
         cmd: az network public-ip show --resource-group "{{ resource_group }}"  --name "{{ item }}"  --query "ipAddress" --output tsv
@@ -31,6 +30,13 @@
         regexp: "^ *{{ item.item }}:\n *ansible_host.+"
         replace: "    {{ item.item }}:\n      ansible_host: {{ item.stdout }}"
       loop: "{{ echo.results }}"
+
+- name: Deploying frontend
+  hosts: "{{ frontend_host }}"
+  vars_files: config.yml
+  become: true
+  roles:
+    - frontend
 
 - name: Setting up default database
   hosts: "{{ db_default_host }}"
@@ -99,10 +105,3 @@
   roles:
     - role: ngnix
       when: setup == 4
-
-- name: Deploying frontend
-  hosts: "{{ frontend_host }}"
-  vars_files: config.yml
-  become: true
-  roles:
-    - frontend

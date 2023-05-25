@@ -1,9 +1,9 @@
 wuslab2:
   hosts:
     vm1:
-      ansible_host: 20.0.241.221
+      ansible_host: 20.0.223.39
     vm2:
-      ansible_host: 20.77.85.166
+      ansible_host: 20.0.222.60
     vm3:
-      ansible_host: 51.145.83.220
+      ansible_host: 20.0.223.146
       
