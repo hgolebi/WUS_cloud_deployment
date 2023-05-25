@@ -77,4 +77,4 @@
     name: "petclinic-ngnix"
     image: "petclinic-ngnix:latest"
     published_ports:
-      - "{{ ngnix_port}}:{{ ngnix_port }}"
+      - "{{ ngnix_port }}:{{ ngnix_port }}"

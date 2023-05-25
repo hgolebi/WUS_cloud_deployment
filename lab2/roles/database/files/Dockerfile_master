@@ -12,7 +12,7 @@ RUN echo "CREATE USER 'replication'@'%'; GRANT REPLICATION SLAVE ON *.* TO 'repl
 
 ENV MYSQL_ROOT_PASSWORD='root' \
     MYSQL_ROOT_HOST='%' \
-    MYSQL_USER="pc" \
+    MYSQL_USER="user" \
     MYSQL_PASSWORD="petclinic" \
     MYSQL_DATABASE="petclinic" 
 
